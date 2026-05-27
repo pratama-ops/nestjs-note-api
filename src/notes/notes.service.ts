@@ -1,26 +1,41 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
 
 @Injectable()
 export class NotesService {
-  create(createNoteDto: CreateNoteDto) {
-    return 'This action adds a new note';
+  constructor(private prisma: PrismaService) {} //masukkan prisma service ke dalam class
+
+  insert(dto: CreateNoteDto) { //masukkan note baru
+    return this.prisma.note.create({ data: dto });
   }
 
-  findAll() {
-    return `This action returns all notes`;
+  findAll() { //ambil semua note
+    return this.prisma.note.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} note`;
+  async findOne(id: number) { //ambil note by id
+    const note = await this.prisma.note.findUnique({ where: { id } });
+    if(!note) {
+      throw new NotFoundException(`Note dengan id ${id} tidak ditemukan`);
+    }
+    return note;
   }
 
-  update(id: number, updateNoteDto: UpdateNoteDto) {
-    return `This action updates a #${id} note`;
+  async update(id: number, dto: UpdateNoteDto) { //edit note
+    const note = await this.prisma.note.findUnique({ where: { id } });
+    if(!note) {
+      throw new NotFoundException(`Note dengan id ${id} gak ada bosku`);
+    }
+    return this.prisma.note.update({ where: { id }, data: dto });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} note`;
+  async remove(id: number) { //hapus note
+    const note = await this.prisma.note.findUnique({ where: { id } });
+    if(!note) {
+      throw new NotFoundException(`Gak ada bos, ngarep lu anjinq`);
+    }
+    return this.prisma.note.delete({ where: { id } });
   }
 }

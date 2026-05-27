@@ -1,20 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { NotesService } from './notes.service';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
+import { JwtAuthGuard } from '../auth/jwt.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('notes')
 export class NotesController {
   constructor(private readonly notesService: NotesService) {}
 
   @Post()
-  create(@Body() createNoteDto: CreateNoteDto) {
-    return this.notesService.create(createNoteDto);
+  insert(@Body() createNoteDto: CreateNoteDto) {
+    return this.notesService.insert(createNoteDto); //handle POST /notes lalu teruskan ke service
   }
 
   @Get()
   findAll() {
-    return this.notesService.findAll();
+    return this.notesService.findAll(); //handle GET /notes lalu teruskan ke service
   }
 
   @Get(':id')
